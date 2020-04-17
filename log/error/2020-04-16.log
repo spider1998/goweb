@@ -1,0 +1,45 @@
+
+error:[2020-04-16 18:39:01]【error】 log_test.go:15 test error1
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:02]【error】 log_test.go:15 test error2
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:03]【error】 log_test.go:15 test error3
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:04]【error】 log_test.go:15 test error4
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:05]【error】 log_test.go:15 test error5
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:06]【error】 log_test.go:15 test error6
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:07]【error】 log_test.go:15 test error7
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:08]【error】 log_test.go:15 test error8
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:09]【error】 log_test.go:15 test error9
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:10]【error】 log_test.go:15 test error10
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:11]【error】 log_test.go:15 test error11
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:12]【error】 log_test.go:15 test error12
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:13]【error】 log_test.go:15 test error13
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:14]【error】 log_test.go:15 test error14
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:15]【error】 log_test.go:15 test error15
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:16]【error】 log_test.go:15 test error16
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:17]【error】 log_test.go:15 test error17
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:18]【error】 log_test.go:15 test error18
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:19]【error】 log_test.go:15 test error19
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:20]【error】 log_test.go:15 test error20
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:21]【error】 log_test.go:15 test error21
+%!(EXTRA string=add error)
+error:[2020-04-16 18:39:22]【error】 log_test.go:15 test error22
+%!(EXTRA string=add error)
