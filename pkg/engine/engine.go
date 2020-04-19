@@ -2,42 +2,24 @@ package engine
 
 import (
 	"fmt"
+	"goweb/pkg/cron"
+	"goweb/pkg/register"
 	"sync"
 	"time"
 
-	"goweb/code"
-	"goweb/log"
+	"goweb/pkg/code"
+	"goweb/pkg/log"
 )
 
 type Handler func(*Job) (code code.Code, err error)
-
-type GlobalHandler func() (code code.Code, err error)
 
 type GlobalEngine struct {
 	handlers     map[string]Handler
 	emptyHandler Handler
 	l            sync.RWMutex
-	shutDowns    []func()
+	shutdowns    []func()
 	stop         bool
-	Logger       *log.WebLogger
-}
-
-var Engine = NewEngine()
-
-var GlobalHandlers map[string]GlobalHandler
-
-func init() {
-	GlobalHandlers = make(map[string]GlobalHandler)
-}
-
-func Register(name string, handler GlobalHandler) {
-	_, exists := GlobalHandlers[name]
-	if exists {
-		_ = fmt.Errorf("Can't overwrite global handler for command %s ", name)
-		return
-	}
-	GlobalHandlers[name] = handler
-	return
+	Logger       log.Logger
 }
 
 func NewEngine() *GlobalEngine {
@@ -45,8 +27,44 @@ func NewEngine() *GlobalEngine {
 		handlers: make(map[string]Handler),
 		Logger:   log.NewLogger(),
 	}
-	go eng.Logger.Watch()
 	return eng
+}
+
+func (eng *GlobalEngine) Initial() *GlobalEngine {
+	if err := eng.initial(register.Register, cron.Cron, eng.Logger); err != nil {
+		panic(err)
+	}
+	eng.onShutdown(cron.Cron)
+
+	return eng
+}
+
+func (eng *GlobalEngine) initial(services ...InitialService) error {
+	for _, s := range services {
+		v, ok := s.(InitialService)
+		if ok {
+			go v.Run(eng.Logger)
+		}
+	}
+
+	return nil
+}
+
+func (eng *GlobalEngine) onShutdown(services ...OnShutdownService) {
+	for _, s := range services {
+		v, ok := s.(OnShutdownService)
+		if ok {
+			eng.AddShutdown(v.OnShutdown())
+		}
+	}
+	return
+}
+
+func (eng *GlobalEngine) Run() {
+	fmt.Println("start engine")
+	eng.Logger.Infof("test info", "test engine")
+	time.Sleep(time.Second * 120)
+	eng.Shutdown()
 }
 
 func (eng *GlobalEngine) Register(name string, handler Handler) error {
@@ -83,7 +101,7 @@ func (eng *GlobalEngine) Shutdown() {
 	eng.l.Unlock()
 
 	var wg sync.WaitGroup
-	for _, h := range eng.shutDowns {
+	for _, h := range eng.shutdowns {
 		wg.Add(1)
 		go func(h func()) {
 			defer wg.Done()
@@ -104,7 +122,7 @@ func (eng *GlobalEngine) Shutdown() {
 
 func (eng *GlobalEngine) AddShutdown(s func()) {
 	eng.l.Lock()
-	eng.shutDowns = append(eng.shutDowns, s)
+	eng.shutdowns = append(eng.shutdowns, s)
 	eng.l.Unlock()
 }
 

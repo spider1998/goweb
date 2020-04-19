@@ -2,12 +2,22 @@ package log
 
 import (
 	"fmt"
+	"goweb/pkg/config"
 	"io"
 	"os"
 	"runtime"
 	"strings"
 	"time"
 )
+
+type Logger interface {
+	Run(...Logger)
+	Debugf(format string, a ...interface{})
+	Infof(format string, a ...interface{})
+	Errorf(format string, a ...interface{})
+	Fatalf(format string, a ...interface{})
+	Warnf(format string, a ...interface{})
+}
 
 type WebLogger struct {
 	Debug          bool
@@ -66,7 +76,7 @@ func (l *WebLogger) truncate() {
 
 }
 
-func (l *WebLogger) Watch() {
+func (l WebLogger) Run(logger ...Logger) {
 	WriteLogFunc := func() {
 		var logs []string
 		logs = l.LogMsg
@@ -93,27 +103,27 @@ func (l *WebLogger) cleanMsg() {
 	l.LogMsg = []string{}
 }
 
-func (l *WebLogger) Debugf(format string, a ...interface{}) {
+func (l WebLogger) Debugf(format string, a ...interface{}) {
 	if os.Getenv("DEBUG") != "" {
 		logf(os.Stderr, priorityDebug, format, a...)
 	}
 }
 
-func (l *WebLogger) Infof(format string, a ...interface{}) {
+func (l WebLogger) Infof(format string, a ...interface{}) {
 	l.LogChan <- priorityInfo.String() + ":" + logf(os.Stdout, priorityInfo, format, a...)
 
 }
 
-func (l *WebLogger) Errorf(format string, a ...interface{}) {
+func (l WebLogger) Errorf(format string, a ...interface{}) {
 	l.LogChan <- priorityError.String() + ":" + logf(os.Stderr, priorityError, format, a...)
 }
 
-func (l *WebLogger) Fatalf(format string, a ...interface{}) {
+func (l WebLogger) Fatalf(format string, a ...interface{}) {
 	l.LogChan <- priorityFatal.String() + ":" + logf(os.Stderr, priorityFatal, format, a...)
 	os.Exit(1)
 }
 
-func (l *WebLogger) Warnf(format string, a ...interface{}) {
+func (l WebLogger) Warnf(format string, a ...interface{}) {
 	l.LogChan <- priorityWarn.String() + ":" + logf(os.Stderr, priorityWarn, format, a...)
 }
 
@@ -132,14 +142,13 @@ func logf(stream io.Writer, level priority, format string, a ...interface{}) str
 	} else {
 		prefix = fmt.Sprintf(logFormat, time.Now().Format(timeFormat), level.String(), format)
 	}
-	fmt.Fprintf(stream, prefix, a...)
 	return fmt.Sprintf(prefix, a...)
 }
 
-func NewLogger() *WebLogger {
+func NewLogger() Logger {
 	var l WebLogger
-	l.SingleCapacity = 0
-	l.RuntimePath = "./"
+	l.SingleCapacity = config.GlobalConfig.Log.SingleCapacity
+	l.RuntimePath = config.GlobalConfig.Log.RuntimePath
 	l.LogChan = make(chan string)
-	return &l
+	return l
 }

@@ -1,0 +1,7 @@
+version: 1.0
+cron:
+  ping: "*/5 * * * * ?"
+  version: "*/10 * * * * ?"
+log:
+  single_capacity: 5
+  runtime_path: "./"
