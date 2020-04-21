@@ -5,9 +5,17 @@ import (
 	"goweb/pkg/config"
 	"io"
 	"os"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
+)
+
+const (
+	_LineFeed    = "\r\n"
+	_UnknownFile = "<unknown file>"
+	_DirSymbol   = "/"
+	_LogSuffix   = ".log"
 )
 
 type Logger interface {
@@ -17,6 +25,7 @@ type Logger interface {
 	Errorf(format string, a ...interface{})
 	Fatalf(format string, a ...interface{})
 	Warnf(format string, a ...interface{})
+	WriteStorage(msg string)
 }
 
 type WebLogger struct {
@@ -82,7 +91,7 @@ func (l WebLogger) Run(logger ...Logger) {
 		logs = l.LogMsg
 		l.cleanMsg()
 		for _, logRecord := range logs {
-			writeLog(l.RuntimePath, logRecord)
+			l.WriteStorage(logRecord)
 		}
 	}
 	for {
@@ -133,7 +142,7 @@ func logf(stream io.Writer, level priority, format string, a ...interface{}) str
 	if level <= priorityError || level == priorityDebug {
 		_, file, line, ok := runtime.Caller(2)
 		if !ok {
-			file = "<unknown file>"
+			file = _UnknownFile
 			line = -1
 		} else {
 			file = file[strings.LastIndex(file, "/")+1:]
@@ -143,6 +152,28 @@ func logf(stream io.Writer, level priority, format string, a ...interface{}) str
 		prefix = fmt.Sprintf(logFormat, time.Now().Format(timeFormat), level.String(), format)
 	}
 	return fmt.Sprintf(prefix, a...)
+}
+
+func (l WebLogger) WriteStorage(msg string) {
+	r, _ := regexp.Compile(`\d{4}-\d{2}-\d{2}`)
+	times := r.FindString(msg)
+
+	var (
+		err error
+		f   *os.File
+	)
+	path := l.RuntimePath + strings.Split(msg, ":")[0]
+	if !IsExist(path) {
+		if err = CreateDir(path); err != nil {
+			logf(os.Stderr, priorityFatal, err.Error())
+		}
+	}
+
+	f, err = os.OpenFile(path+_DirSymbol+times+_LogSuffix, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	_, err = io.WriteString(f, _LineFeed+msg)
+
+	defer f.Close()
+	return
 }
 
 func NewLogger() Logger {

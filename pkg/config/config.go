@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
 	"strconv"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
