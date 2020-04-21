@@ -1,61 +1,29 @@
-package config
+package util
 
 import (
 	"fmt"
-	"io/ioutil"
 	"reflect"
 	"strconv"
-
-	"gopkg.in/yaml.v2"
 )
 
-type Config struct {
-	Addr string            `yaml:"addr"`
-	Cron map[string]string `yaml:"cron"`
-	Log  LogConfig         `yaml:"log"`
-}
-
-type LogConfig struct {
-	SingleCapacity int    `yaml:"single_capacity" default:"0"`
-	RuntimePath    string `yaml:"runtime_path" default:"./"`
-	Test           bool   `yaml:"test"`
-}
-
-var GlobalConfig = new(Config)
-
-func init() {
-	yamlFile, err := ioutil.ReadFile("/home/spider1998/goweb/pkg/config/conf.yaml")
-	if err != nil {
-		panic(err)
-	}
-	err = yaml.Unmarshal(yamlFile, GlobalConfig)
-	if err != nil {
-		panic(err)
-	}
-	structByReflect(GlobalConfig)
-	return
-}
-
-func structByReflect(inStructPtr interface{}) {
+func ParseTagReflect(inStructPtr interface{}, tag string) {
 	rType := reflect.TypeOf(inStructPtr)
 	rVal := reflect.ValueOf(inStructPtr)
 	if rType.Kind() == reflect.Ptr {
-		// 传入的inStructPtr是指针，需要.Elem()取得指针指向的value
 		rType = rType.Elem()
 		rVal = rVal.Elem()
 	}
-	// 遍历结构体
 	for i := 0; i < rType.NumField(); i++ {
 		t := rType.Field(i)
 		f := rVal.Field(i)
 		switch f.Kind() {
 		case reflect.Struct:
-			structByReflect(f.Addr().Interface())
+			ParseTagReflect(f.Addr().Interface(), tag)
 		default:
 			if !isBlank(f) {
 				continue
 			}
-			key := t.Tag.Get("default")
+			key := t.Tag.Get(tag)
 			fmt.Println(f.Type())
 			structType := f.Type()
 			switch structType.Kind() {

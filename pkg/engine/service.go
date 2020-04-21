@@ -1,9 +1,11 @@
 package engine
 
-import "goweb/pkg/log"
+import (
+	"goweb/pkg/components"
+)
 
 type InitialService interface {
-	Run(...log.Logger)
+	Run(...components.Logger)
 }
 
 type OnShutdownService interface {

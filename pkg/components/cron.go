@@ -1,18 +1,18 @@
-package cron
+package components
 
 import (
 	"fmt"
+
 	"github.com/robfig/cron"
-	"goweb/pkg/config"
+
 	"goweb/pkg/handler"
-	"goweb/pkg/log"
 )
 
 var Cron = new(CronService)
 
 type CronService struct {
 	cron   *cron.Cron
-	logger log.Logger
+	logger Logger
 }
 
 type CronMsg struct {
@@ -20,7 +20,7 @@ type CronMsg struct {
 	Exp         string
 }
 
-func (c *CronService) Run(logger ...log.Logger) {
+func (c *CronService) Run(logger ...Logger) {
 	c.logger = logger[0]
 	msgs := c.getCronMsg()
 	c.cron = cron.New()
@@ -44,7 +44,7 @@ func (c *CronService) OnShutdown() func() {
 }
 
 func (c *CronService) getCronMsg() (m []CronMsg) {
-	cronMap := config.GlobalConfig.Cron
+	cronMap := GlobalConfig.Cron
 	for k, v := range cronMap {
 		m = append(m, CronMsg{
 			HandlerName: k,

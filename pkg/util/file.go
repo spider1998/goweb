@@ -1,4 +1,4 @@
-package log
+package util
 
 import (
 	"fmt"
@@ -27,6 +27,14 @@ func remove(file string) error {
 		return err
 	}
 	return nil
+}
+
+func GetDirSize(path string) (int64, error) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
+		return 0,nil
+	}
+	return fileInfo.Size(), nil
 }
 
 func walkDir(dir string, suffix int64, f func(string) error) (err error) {

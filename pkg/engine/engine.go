@@ -2,13 +2,13 @@ package engine
 
 import (
 	"fmt"
-	"goweb/pkg/cron"
-	"goweb/pkg/register"
 	"sync"
 	"time"
 
+	"goweb/pkg/components"
+	"goweb/pkg/register"
+
 	"goweb/pkg/code"
-	"goweb/pkg/log"
 )
 
 type Handler func(*Job) (code code.Code, err error)
@@ -19,22 +19,22 @@ type GlobalEngine struct {
 	l            sync.RWMutex
 	shutdowns    []func()
 	stop         bool
-	Logger       log.Logger
+	Logger       components.Logger
 }
 
 func NewEngine() *GlobalEngine {
 	eng := &GlobalEngine{
 		handlers: make(map[string]Handler),
-		Logger:   log.NewLogger(),
+		Logger:   components.NewLogger(),
 	}
 	return eng
 }
 
 func (eng *GlobalEngine) Initial() *GlobalEngine {
-	if err := eng.initial(register.Register, cron.Cron, eng.Logger); err != nil {
+	if err := eng.initial(register.Register, components.Cron, eng.Logger); err != nil {
 		panic(err)
 	}
-	eng.onShutdown(cron.Cron)
+	eng.onShutdown(components.Cron)
 
 	return eng
 }

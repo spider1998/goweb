@@ -1,14 +1,14 @@
-package cron
+package components
 
 import (
-	"goweb/pkg/log"
-	"goweb/pkg/register"
 	"testing"
 	"time"
+
+	"goweb/pkg/register"
 )
 
 func TestCronService_Run(t *testing.T) {
-	logger := log.NewLogger()
+	logger := NewLogger()
 	register.Init()
 	Cron.Run(logger)
 	time.Sleep(time.Second * 20)

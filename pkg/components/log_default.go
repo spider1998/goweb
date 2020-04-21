@@ -1,14 +1,15 @@
-package log
+package components
 
 import (
 	"fmt"
-	"goweb/pkg/config"
 	"io"
 	"os"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
+
+	"goweb/pkg/util"
 )
 
 const (
@@ -17,16 +18,6 @@ const (
 	_DirSymbol   = "/"
 	_LogSuffix   = ".log"
 )
-
-type Logger interface {
-	Run(...Logger)
-	Debugf(format string, a ...interface{})
-	Infof(format string, a ...interface{})
-	Errorf(format string, a ...interface{})
-	Fatalf(format string, a ...interface{})
-	Warnf(format string, a ...interface{})
-	WriteStorage(msg string)
-}
 
 type WebLogger struct {
 	Debug          bool
@@ -163,8 +154,8 @@ func (l WebLogger) WriteStorage(msg string) {
 		f   *os.File
 	)
 	path := l.RuntimePath + strings.Split(msg, ":")[0]
-	if !IsExist(path) {
-		if err = CreateDir(path); err != nil {
+	if !util.IsExist(path) {
+		if err = util.CreateDir(path); err != nil {
 			logf(os.Stderr, priorityFatal, err.Error())
 		}
 	}
@@ -178,8 +169,8 @@ func (l WebLogger) WriteStorage(msg string) {
 
 func NewLogger() Logger {
 	var l WebLogger
-	l.SingleCapacity = config.GlobalConfig.Log.SingleCapacity
-	l.RuntimePath = config.GlobalConfig.Log.RuntimePath
+	l.SingleCapacity = GlobalConfig.Log.SingleCapacity
+	l.RuntimePath = GlobalConfig.Log.RuntimePath
 	l.LogChan = make(chan string)
 	return l
 }

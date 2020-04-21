@@ -2,7 +2,10 @@ package register
 
 import (
 	"fmt"
+
 	"goweb/pkg/code"
+	"goweb/pkg/components"
+	"goweb/pkg/util"
 )
 
 func ping() (codes code.Code, err error) {
@@ -14,6 +17,10 @@ func version() (codes code.Code, err error) {
 	return
 }
 
-func truncateLog() {
+func truncateLog() (code code.Code, err error) {
+	logConfig := components.GlobalConfig.Log
+	logSize, err := util.GetDirSize(logConfig.RuntimePath)
+	if err != nil {
 
+	}
 }
