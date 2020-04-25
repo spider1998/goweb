@@ -19,6 +19,14 @@ const (
 	_LogSuffix   = ".log"
 )
 
+func NewLogger() Logger {
+	var l WebLogger
+	l.SingleCapacity = GlobalConfig.Log.SingleCapacity
+	l.RuntimePath = GlobalConfig.Log.RuntimePath
+	l.LogChan = make(chan string)
+	return l
+}
+
 type WebLogger struct {
 	Debug          bool
 	Level          int
@@ -165,12 +173,4 @@ func (l WebLogger) WriteStorage(msg string) {
 
 	defer f.Close()
 	return
-}
-
-func NewLogger() Logger {
-	var l WebLogger
-	l.SingleCapacity = GlobalConfig.Log.SingleCapacity
-	l.RuntimePath = GlobalConfig.Log.RuntimePath
-	l.LogChan = make(chan string)
-	return l
 }
