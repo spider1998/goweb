@@ -44,7 +44,7 @@ func (c *CronService) OnShutdown() func() {
 }
 
 func (c *CronService) getCronMsg() (m []CronMsg) {
-	cronMap := GlobalConfig.Cron
+	cronMap := Conf.Cron
 	for k, v := range cronMap {
 		m = append(m, CronMsg{
 			HandlerName: k,

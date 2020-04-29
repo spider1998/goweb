@@ -18,7 +18,7 @@ func version() (codes code.Code, err error) {
 }
 
 func truncateLog() (code code.Code, err error) {
-	logConfig := components.GlobalConfig.Log
+	logConfig := components.Conf.Log
 	logSize, err := util.GetDirSize(logConfig.RuntimePath)
 	if err != nil {
 

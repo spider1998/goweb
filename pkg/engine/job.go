@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"goweb/pkg/components"
 	"strings"
 
 	"goweb/pkg/code"
@@ -19,7 +20,7 @@ func (job *Job) Run() error {
 	if job.Eng.IsShutdown() {
 		return fmt.Errorf("engine is shutdown")
 	}
-	log := job.Eng.Logger
+	log := components.Log
 	log.Infof("+job %s", job.Call())
 	defer func() {
 		log.Infof("-job %s%s", job.Call(), job.CodeString())

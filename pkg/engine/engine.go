@@ -19,19 +19,17 @@ type GlobalEngine struct {
 	l            sync.RWMutex
 	shutdowns    []func()
 	stop         bool
-	Logger       components.Logger
 }
 
 func NewEngine() *GlobalEngine {
 	eng := &GlobalEngine{
 		handlers: make(map[string]Handler),
-		Logger:   components.NewLogger(),
 	}
 	return eng
 }
 
 func (eng *GlobalEngine) Initial() *GlobalEngine {
-	if err := eng.initial(register.Register, components.Cron, eng.Logger); err != nil {
+	if err := eng.initial(register.Register, components.Cron, components.Log); err != nil {
 		panic(err)
 	}
 	eng.onShutdown(components.Cron)
@@ -43,7 +41,7 @@ func (eng *GlobalEngine) initial(services ...InitialService) error {
 	for _, s := range services {
 		v, ok := s.(InitialService)
 		if ok {
-			go v.Run(eng.Logger)
+			go v.Run(components.Log)
 		}
 	}
 
@@ -62,7 +60,7 @@ func (eng *GlobalEngine) onShutdown(services ...OnShutdownService) {
 
 func (eng *GlobalEngine) Run() {
 	fmt.Println("start engine")
-	eng.Logger.Infof("test info", "test engine")
+	components.Log.Infof("test info", "test engine")
 	time.Sleep(time.Second * 120)
 	eng.Shutdown()
 }

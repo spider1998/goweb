@@ -19,10 +19,10 @@ const (
 	_LogSuffix   = ".log"
 )
 
-func NewLogger() Logger {
+func NewLogger(config *Config) Logger {
 	var l WebLogger
-	l.SingleCapacity = GlobalConfig.Log.SingleCapacity
-	l.RuntimePath = GlobalConfig.Log.RuntimePath
+	l.SingleCapacity = config.Log.SingleCapacity
+	l.RuntimePath = config.Log.RuntimePath
 	l.LogChan = make(chan string)
 	return l
 }
