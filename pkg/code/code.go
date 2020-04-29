@@ -1,7 +1,37 @@
 package code
 
-type Code int
+import (
+	"net/http"
+)
+
+type ModuleError struct {
+	Module string
+	Error  Code
+}
+
+type Code string
 
 const (
-	StatusOk Code = 200
+	InternalServerError Code = "INTERNAL_SERVER_ERROR"
+	NotFound            Code = "NOT_FOUND"
+	MethodNotAllowed    Code = "METHOD_NOT_ALLOWED"
+
+	InvalidData           Code = "INVALID_DATA"
+	InvalidToken          Code = "INVALID_TOKEN"
+	InvalidPersonToken    Code = "INVALID_PERSON_TOKEN"
+	InvalidRolePermission Code = "INVALID_ROLE_PERMISSION"
+	InvalidDeviceKey      Code = "INVALID_DEVICE_KEY"
 )
+
+var codeStatusMap = map[Code]int{
+	InternalServerError: http.StatusInternalServerError,
+	NotFound:            http.StatusNotFound,
+	MethodNotAllowed:    http.StatusMethodNotAllowed,
+}
+
+func CodeError(code Code) APIError {
+	return Error(ModuleError{
+		Module: "System",
+		Error:  code,
+	})
+}

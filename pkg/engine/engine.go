@@ -2,11 +2,16 @@ package engine
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"goweb/pkg/components"
 	"goweb/pkg/register"
+	"goweb/pkg/router"
 
 	"goweb/pkg/code"
 )
@@ -14,11 +19,14 @@ import (
 type Handler func(*Job) (code code.Code, err error)
 
 type GlobalEngine struct {
+	httpServer   *http.Server
+	wg           sync.WaitGroup
 	handlers     map[string]Handler
 	emptyHandler Handler
 	l            sync.RWMutex
 	shutdowns    []func()
 	stop         bool
+	close        chan struct{}
 }
 
 func NewEngine() *GlobalEngine {
@@ -58,11 +66,43 @@ func (eng *GlobalEngine) onShutdown(services ...OnShutdownService) {
 	return
 }
 
+func (eng *GlobalEngine) serveHTTP() {
+	defer eng.wg.Done()
+
+	eng.httpServer.Handler = router.Register(components.Log)
+
+	components.Log.Infof("listen and serve http service.", "addr", components.Conf.Addr)
+
+	err := eng.httpServer.ListenAndServe()
+	if err != nil {
+		if err != http.ErrServerClosed {
+			fmt.Println(err)
+			fmt.Println("an error was returned while listen and serve engine.")
+			return
+		}
+	}
+}
+
+func (eng *GlobalEngine) registerSignal() {
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP)
+	select {
+	case sig := <-ch:
+		signal.Ignore(syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP)
+		fmt.Println("received signal, try to shutdown engine.", sig)
+		close(ch)
+		close(eng.close)
+		eng.Shutdown()
+
+	}
+}
+
 func (eng *GlobalEngine) Run() {
-	fmt.Println("start engine")
-	components.Log.Infof("test info", "test engine")
-	time.Sleep(time.Second * 120)
-	eng.Shutdown()
+	go eng.registerSignal()
+
+	eng.wg.Add(1)
+	go eng.serveHTTP()
+	eng.wg.Wait()
 }
 
 func (eng *GlobalEngine) Register(name string, handler Handler) error {
